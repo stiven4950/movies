@@ -1,5 +1,5 @@
 class Actors {
-  List<Actor> items = new List.empty();
+  List<Actor> items = new List.empty(growable: true);
 
   Actors();
 
