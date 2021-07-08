@@ -4,7 +4,6 @@ class Actors {
   Actors();
 
   Actors.fromJsonList(List<dynamic> jsonList) {
-    if (jsonList == null) return;
     jsonList.forEach((element) {
       final actor = new Actor.fromJsonMap(element);
       items.add(actor);
