@@ -1,167 +1,149 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
-import 'package:movies/src/models/actor_model.dart';
-import 'package:movies/src/models/movie_model.dart';
-import 'package:movies/src/providers/movie_provider.dart';
+import 'package:movies/src/models/movie.dart';
+
+import 'package:movies/src/widgets/casting_cards.dart';
 
 class MovieDetailPage extends StatelessWidget {
-  final route = 'moviedetail/';
-  const MovieDetailPage({Key key}) : super(key: key);
+  static final route = 'moviedetail/';
 
   @override
   Widget build(BuildContext context) {
-    final Movie movie = ModalRoute.of(context).settings.arguments;
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          _createAppBar(movie),
-          SliverList(
-            delegate: SliverChildListDelegate(
-              [
-                SizedBox(height: 10.0),
-                _createPosterTitle(context, movie),
-                _createDescription(movie),
-                _createActorDetail(context, movie),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+    final Movie movie = ModalRoute.of(context)!.settings.arguments as Movie;
 
-  Widget _createAppBar(Movie movie) {
+    return Scaffold(
+        body: CustomScrollView(
+      slivers: [
+        _CustomAppBar(movie),
+        SliverList(
+            delegate: SliverChildListDelegate([
+          _PosterAndTitle(movie),
+          _Overview(movie),
+          _Overview(movie),
+          _Overview(movie),
+          CastingCards(movie.id),
+        ]))
+      ],
+    ));
+  }
+}
+
+class _CustomAppBar extends StatelessWidget {
+  final Movie movie;
+
+  const _CustomAppBar(this.movie);
+
+  @override
+  Widget build(BuildContext context) {
     return SliverAppBar(
-      elevation: 2.0,
-      backgroundColor: Colors.indigoAccent,
-      expandedHeight: 200.0,
+      backgroundColor: Colors.indigo,
+      expandedHeight: 200,
       floating: false,
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
         centerTitle: true,
-        title: Text(
-          movie.title,
-          style: TextStyle(color: Colors.white, fontSize: 16.0),
+        titlePadding: EdgeInsets.all(0),
+        title: Container(
+          width: double.infinity,
+          alignment: Alignment.bottomCenter,
+          padding: EdgeInsets.only(bottom: 10, left: 10, right: 10),
+          color: Colors.black12,
+          child: Text(
+            movie.title,
+            style: TextStyle(fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
         ),
         background: FadeInImage(
-          image: NetworkImage(movie.getBackgroundImage()),
           placeholder: AssetImage('assets/image/loading.gif'),
-          //fadeInDuration: Duration(microseconds: 150),
+          image: NetworkImage(movie.fullBackdropPath),
           fit: BoxFit.cover,
         ),
       ),
     );
   }
+}
 
-  Widget _createPosterTitle(BuildContext context, Movie movie) {
+class _PosterAndTitle extends StatelessWidget {
+  final Movie movie;
+
+  const _PosterAndTitle(this.movie);
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.0),
+      margin: EdgeInsets.only(top: 20),
+      padding: EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         children: [
           Hero(
-            tag: movie.uniqueId,
+            tag: movie.heroId!,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(20.0),
-              child: Image(
-                image: NetworkImage(movie.getPosterImage()),
-                height: 150.0,
+              borderRadius: BorderRadius.circular(20),
+              child: FadeInImage(
+                placeholder: AssetImage('assets/no-image.jpg'),
+                image: NetworkImage(movie.fullPosterImg),
+                height: 150,
               ),
             ),
           ),
-          SizedBox(
-            width: 20.0,
-          ),
-          Flexible(
+          SizedBox(width: 20),
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: size.width - 190),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  movie.title,
-                  style: Theme.of(context).textTheme.headline5,
-                  overflow: TextOverflow.ellipsis,
+                FadeIn(
+                  delay: Duration(milliseconds: 200),
+                  child: Text(
+                    movie.title,
+                    style: Theme.of(context).textTheme.headline5,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                Text(
-                  movie.originalTitle,
-                  overflow: TextOverflow.ellipsis,
+                FadeIn(
+                  delay: Duration(milliseconds: 400),
+                  child: Text(
+                    movie.originalTitle,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                Row(
-                  children: [
-                    Icon(Icons.star_border),
-                    Text(
-                      movie.voteAverage.toString(),
-                      style: Theme.of(context).textTheme.headline5,
-                    ),
-                  ],
+                FadeIn(
+                  delay: Duration(milliseconds: 600),
+                  child: Row(
+                    children: [
+                      Icon(Icons.star_border),
+                      Text(
+                        movie.voteAverage.toString(),
+                        style: Theme.of(context).textTheme.headline5,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ),
+          )
         ],
       ),
     );
   }
+}
 
-  Widget _createDescription(Movie movie) {
+class _Overview extends StatelessWidget {
+  final Movie movie;
+
+  const _Overview(this.movie);
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
+      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
       child: Text(
         movie.overview,
         textAlign: TextAlign.justify,
-      ),
-    );
-  }
-
-  Widget _createActorDetail(BuildContext context, Movie movie) {
-    final movieProvider = new MovieProvider();
-
-    return FutureBuilder(
-      future: movieProvider.getActor(movie.id.toString()),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (snapshot.hasData) {
-          return _createActorPageView(snapshot.data);
-        } else
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-      },
-    );
-  }
-
-  Widget _createActorPageView(List<Actor> actor) {
-    return SizedBox(
-      height: 200.0,
-      child: PageView.builder(
-          pageSnapping: false,
-          controller: PageController(
-            viewportFraction: 0.3,
-            initialPage: 1,
-          ),
-          itemCount: actor.length,
-          itemBuilder: (context, index) {
-            return _createActorCard(context, actor[index]);
-          }),
-    );
-  }
-
-  Widget _createActorCard(BuildContext context, Actor actor) {
-    return Container(
-      child: Column(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20.0),
-            child: FadeInImage(
-              image: NetworkImage(actor.getPick()),
-              height: 150.0,
-              placeholder: AssetImage('assets/image/no-image.jpg'),
-              fit: BoxFit.cover,
-            ),
-          ),
-          SizedBox(height: 5.0),
-          Text(
-            actor.name,
-            style: Theme.of(context).textTheme.caption,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+        style: Theme.of(context).textTheme.subtitle1,
       ),
     );
   }

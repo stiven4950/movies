@@ -4,5 +4,5 @@ import 'package:movies/src/pages/movie_detail_page.dart';
 
 Map<String, WidgetBuilder> getApplicationRoutes = {
   HomePage().route: (context) => HomePage(),
-  MovieDetailPage().route: (context) => MovieDetailPage(),
+  MovieDetailPage.route: (context) => MovieDetailPage(),
 };
