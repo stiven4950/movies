@@ -12,19 +12,23 @@ class MovieDetailPage extends StatelessWidget {
     final Movie movie = ModalRoute.of(context)!.settings.arguments as Movie;
 
     return Scaffold(
-        body: CustomScrollView(
-      slivers: [
-        _CustomAppBar(movie),
-        SliverList(
-            delegate: SliverChildListDelegate([
-          _PosterAndTitle(movie),
-          _Overview(movie),
-          _Overview(movie),
-          _Overview(movie),
-          CastingCards(movie.id),
-        ]))
-      ],
-    ));
+      body: CustomScrollView(
+        slivers: [
+          _CustomAppBar(movie),
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                _PosterAndTitle(movie),
+                _Overview(movie),
+                _Overview(movie),
+                _Overview(movie),
+                CastingCards(movie.id),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

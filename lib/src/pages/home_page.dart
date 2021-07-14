@@ -7,13 +7,14 @@ import 'package:movies/src/widgets/movie_slider.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
-  final route = 'home/';
+  static final route = 'home/';
 
   final movieProvider = new MovieProvider();
 
   @override
   Widget build(BuildContext context) {
     final movieProvider = Provider.of<MovieProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
